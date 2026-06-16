@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Plus, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import AddProjectMember from "./AddProjectMember";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
     Card,
     CardContent,
@@ -119,18 +120,17 @@ export default function ProjectSettings({ project }) {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Start Date</Label>
-                                <Input
-                                    type="date"
-                                    value={format(formData.start_date, "yyyy-MM-dd")}
-                                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                                <DatePicker
+                                    value={formData.start_date ? (typeof formData.start_date === 'string' ? formData.start_date.split('T')[0] : format(formData.start_date, "yyyy-MM-dd")) : ""}
+                                    onChange={(value) => setFormData({ ...formData, start_date: value })}
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>End Date</Label>
-                                <Input
-                                    type="date"
-                                    value={format(formData.end_date, "yyyy-MM-dd")}
-                                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                                <DatePicker
+                                    value={formData.end_date ? (typeof formData.end_date === 'string' ? formData.end_date.split('T')[0] : format(formData.end_date, "yyyy-MM-dd")) : ""}
+                                    onChange={(value) => setFormData({ ...formData, end_date: value })}
+                                    min={formData.start_date ? (typeof formData.start_date === 'string' ? formData.start_date.split('T')[0] : format(formData.start_date, "yyyy-MM-dd")) : undefined}
                                 />
                             </div>
                         </div>
@@ -178,7 +178,7 @@ export default function ProjectSettings({ project }) {
                             <div className="space-y-2 mt-2 max-h-32 overflow-y-auto">
                                 {project.members.map((member, index) => (
                                     <div key={index} className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 text-sm" >
-                                        <span> {member?.user?.email || "Unknown"} </span>
+                                        <span className="truncate inline-block max-w-[150px] sm:max-w-[220px]" title={member?.user?.email || "Unknown"}> {member?.user?.email || "Unknown"} </span>
                                         {project.team_lead === member.user.id && (
                                             <Badge variant="secondary">Team Lead</Badge>
                                         )}

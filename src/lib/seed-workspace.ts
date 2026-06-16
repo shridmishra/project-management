@@ -6,6 +6,7 @@ export async function createTemplateWorkspace(userId: string) {
     const workspaceId = `org_${Date.now()}`;
     const projectId = uuidv4();
     const projectId2 = uuidv4();
+    const projectId3 = uuidv4();
 
     // 1. Create Workspace
     const [newWorkspace] = await db.insert(workspaces).values({
@@ -24,31 +25,31 @@ export async function createTemplateWorkspace(userId: string) {
         role: "ADMIN",
     });
 
-    // 3. Create Example Project
+    // 3. Create Projects
+    // Project 1: Active Project (60% Progress)
     await db.insert(projects).values({
         id: projectId,
         name: "Example Project",
         description: "This is an example project to get you started.",
         priority: "MEDIUM",
         status: "ACTIVE",
-        startDate: new Date(),
+        startDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week later
         teamLead: userId,
         workspaceId: workspaceId,
-        progress: 0,
+        progress: 60,
     });
 
-    // 4. Add Project Member
     await db.insert(projectMembers).values({
         userId: userId,
         projectId: projectId,
     });
 
-    // 4b. Create Second Project (Planning Phase)
+    // Project 2: Planning Project (0% Progress)
     await db.insert(projects).values({
         id: projectId2,
         name: "Future Roadmap",
-        description: "Ideas for next quarter.",
+        description: "Ideas and features for next quarter.",
         priority: "LOW",
         status: "PLANNING",
         startDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -63,16 +64,38 @@ export async function createTemplateWorkspace(userId: string) {
         projectId: projectId2,
     });
 
-    // Explicit task IDs for seeding comments & notifications
+    // Project 3: Completed Project (100% Progress)
+    await db.insert(projects).values({
+        id: projectId3,
+        name: "Acme Web Redesign",
+        description: "Initial redesign of the Acme marketing page.",
+        priority: "HIGH",
+        status: "COMPLETED",
+        startDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+        endDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        teamLead: userId,
+        workspaceId: workspaceId,
+        progress: 100,
+    });
+
+    await db.insert(projectMembers).values({
+        userId: userId,
+        projectId: projectId3,
+    });
+
+    // Task IDs
     const taskId1 = uuidv4();
     const taskId2 = uuidv4();
     const taskId3 = uuidv4();
     const taskId4 = uuidv4();
     const taskId5 = uuidv4();
     const taskId6 = uuidv4();
+    const taskId7 = uuidv4();
+    const taskId8 = uuidv4();
 
-    // 5. Create Example Tasks
+    // 4. Create Example Tasks
     const tasksData = [
+        // Project 1: Active
         {
             id: taskId1,
             projectId: projectId,
@@ -109,13 +132,13 @@ export async function createTemplateWorkspace(userId: string) {
         {
             id: taskId4,
             projectId: projectId,
-            title: "Report a bug example",
-            description: "This is what a bug report looks like.",
-            status: "TODO",
+            title: "Report a bug example (Overdue)",
+            description: "This is what an overdue bug report looks like.",
+            status: "TODO", // Not done, so it triggers overdue!
             type: "BUG",
             priority: "HIGH",
             assigneeId: userId,
-            dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+            dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // Overdue by 2 days
         },
         {
             id: taskId5,
@@ -128,22 +151,45 @@ export async function createTemplateWorkspace(userId: string) {
             assigneeId: userId,
             dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
         },
+        // Project 3: Completed (All Done)
         {
             id: taskId6,
-            projectId: projectId,
-            title: "Research new tools",
-            description: "An example of an 'Other' task type.",
-            status: "TODO",
-            type: "OTHER",
-            priority: "LOW",
+            projectId: projectId3,
+            title: "Brand Guideline brainstorm",
+            description: "Initial brainstorm session for colors and fonts.",
+            status: "DONE",
+            type: "TASK",
+            priority: "MEDIUM",
             assigneeId: userId,
-            dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+            dueDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
+        },
+        {
+            id: taskId7,
+            projectId: projectId3,
+            title: "Figma mockup designs",
+            description: "Design mockups for Desktop and Mobile viewports.",
+            status: "DONE",
+            type: "FEATURE",
+            priority: "HIGH",
+            assigneeId: userId,
+            dueDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+        },
+        {
+            id: taskId8,
+            projectId: projectId3,
+            title: "Next.js page deployment",
+            description: "Deploy the final landing page code to Vercel.",
+            status: "DONE",
+            type: "FEATURE",
+            priority: "HIGH",
+            assigneeId: userId,
+            dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         }
     ];
 
     await db.insert(tasks).values(tasksData as any); 
 
-    // 6. Create Example Comments
+    // 5. Create Example Comments
     await db.insert(comments).values([
         {
             id: uuidv4(),
@@ -168,7 +214,7 @@ export async function createTemplateWorkspace(userId: string) {
         }
     ]);
 
-    // 7. Create Example Notifications
+    // 6. Create Example Notifications
     await db.insert(notifications).values([
         {
             id: uuidv4(),

@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { createProjectAsync } from "@/features/workspaces/store/workspaceSlice";
 import type { AppDispatch } from "@/lib/store";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
     Dialog,
     DialogContent,
@@ -176,22 +177,20 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
 
                     {/* Dates */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="start_date">Start Date</Label>
-                            <Input
+                        <div className="space-y-2 flex flex-col">
+                            <Label htmlFor="start_date" className="mb-2">Start Date</Label>
+                            <DatePicker
                                 id="start_date"
-                                type="date"
                                 value={formData.start_date}
-                                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                                onChange={(value) => setFormData({ ...formData, start_date: value })}
                             />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="end_date">End Date</Label>
-                            <Input
+                        <div className="space-y-2 flex flex-col">
+                            <Label htmlFor="end_date" className="mb-2">End Date</Label>
+                            <DatePicker
                                 id="end_date"
-                                type="date"
                                 value={formData.end_date}
-                                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                                onChange={(value) => setFormData({ ...formData, end_date: value })}
                                 min={formData.start_date}
                             />
                         </div>
@@ -252,9 +251,9 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
                         {formData.team_members.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
                                 {formData.team_members.map((email) => (
-                                    <Badge key={email} variant="secondary" className="gap-1">
-                                        {email}
-                                        <button type="button" onClick={() => removeTeamMember(email)} className="ml-1 hover:text-destructive">
+                                    <Badge key={email} variant="secondary" className="gap-1 max-w-[200px] flex items-center" title={email}>
+                                        <span className="truncate">{email}</span>
+                                        <button type="button" onClick={() => removeTeamMember(email)} className="ml-1 hover:text-destructive shrink-0">
                                             <XIcon className="w-3 h-3" />
                                         </button>
                                     </Badge>

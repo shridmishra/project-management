@@ -153,8 +153,10 @@ const Team = () => {
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-muted-foreground">
-                                                {user.user.email}
-                                            </TableCell>
+                                                 <div className="truncate max-w-[160px] md:max-w-[240px]" title={user.user.email}>
+                                                     {user.user.email}
+                                                 </div>
+                                             </TableCell>
                                             <TableCell>
                                                 <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
                                                     {user.role || "User"}
@@ -180,9 +182,9 @@ const Team = () => {
                                                 <p className="font-medium text-foreground">
                                                     {user.user?.name || "Unknown User"}
                                                 </p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {user.user.email}
-                                                </p>
+                                                 <p className="text-sm text-muted-foreground truncate max-w-[200px]" title={user.user.email}>
+                                                     {user.user.email}
+                                                 </p>
                                             </div>
                                         </div>
                                         <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>

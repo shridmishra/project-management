@@ -124,7 +124,7 @@ export default function ProfileSettingsPage() {
                             </div>
                             <div className="space-y-1 text-center sm:text-left">
                                 <h3 className="font-semibold">{name || "User"}</h3>
-                                <p className="text-xs text-muted-foreground">{session?.user?.email}</p>
+                                <p className="text-xs text-muted-foreground truncate max-w-[200px] sm:max-w-[300px]">{session?.user?.email}</p>
                                 <Button type="button" variant="outline" size="sm" className="mt-2 h-8" onClick={() => {
                                     const url = window.prompt("Enter new image URL:");
                                     if (url) setImage(url);

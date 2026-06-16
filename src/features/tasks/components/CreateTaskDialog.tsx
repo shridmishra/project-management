@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { createTaskAsync } from "@/features/workspaces/store/workspaceSlice";
 import type { AppDispatch } from "@/lib/store";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
     Dialog,
     DialogContent,
@@ -193,20 +194,14 @@ export default function CreateTaskDialog({ showCreateTask, setShowCreateTask, pr
                     </div>
 
                     {/* Due Date */}
-                    <div className="space-y-2">
-                        <Label htmlFor="due_date">Due Date</Label>
-                        <Input
+                    <div className="space-y-2 flex flex-col">
+                        <Label htmlFor="due_date" className="mb-1">Due Date</Label>
+                        <DatePicker
                             id="due_date"
-                            type="date"
                             value={formData.due_date}
-                            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                            onChange={(value) => setFormData({ ...formData, due_date: value })}
                             min={new Date().toISOString().split('T')[0]}
                         />
-                        {formData.due_date && (
-                            <p className="text-xs text-muted-foreground">
-                                {format(new Date(formData.due_date), "PPP")}
-                            </p>
-                        )}
                     </div>
 
                     <DialogFooter>
