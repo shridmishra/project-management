@@ -5,6 +5,17 @@ import { authClient } from '@/lib/auth-client'
 // Mock the auth client
 jest.mock('@/lib/auth-client')
 
+// Mock next/navigation
+jest.mock("next/navigation", () => ({
+    useRouter() {
+        return {
+            push: jest.fn(),
+            replace: jest.fn(),
+            prefetch: jest.fn(),
+        };
+    },
+}));
+
 describe('SignIn Page', () => {
     beforeEach(() => {
         jest.clearAllMocks()
@@ -47,6 +58,23 @@ describe('SignIn Page', () => {
                 provider: 'google',
                 callbackURL: '/dashboard',
             })
+        })
+    })
+
+    it('handles guest login', async () => {
+        render(<SignInPage />)
+
+        const guestBtn = screen.getByRole('button', { name: /login as guest/i })
+        expect(guestBtn).toBeInTheDocument()
+        fireEvent.click(guestBtn)
+
+        await waitFor(() => {
+            expect(authClient.signUp.email).toHaveBeenCalledWith({
+                email: expect.stringMatching(/^guest_\d+_\d+@example.com$/),
+                password: 'GuestPassword123!',
+                name: 'Guest User',
+                callbackURL: '/dashboard',
+            }, expect.any(Object))
         })
     })
 })

@@ -17,6 +17,35 @@ export function SignUp() {
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
 
+    const handleGuestLogin = async () => {
+        setLoading(true)
+        const guestEmail = `guest_${Date.now()}_${Math.floor(Math.random() * 1000000)}@example.com`
+        const guestPassword = "GuestPassword123!"
+        const guestName = "Guest User"
+
+        try {
+            toast.loading("Setting up guest account...", { id: "guest-login" })
+            await authClient.signUp.email({
+                email: guestEmail,
+                password: guestPassword,
+                name: guestName,
+                callbackURL: "/dashboard",
+            }, {
+                onSuccess: () => {
+                    toast.success("Logged in as Guest!", { id: "guest-login" })
+                    router.push("/dashboard")
+                },
+                onError: (ctx) => {
+                    toast.error(ctx.error.message || "Failed to log in as guest", { id: "guest-login" })
+                    setLoading(false)
+                }
+            })
+        } catch (error: any) {
+            toast.error(error?.message || "Failed to log in as guest", { id: "guest-login" })
+            setLoading(false)
+        }
+    }
+
     const handleSignUp = async () => {
         setLoading(true)
         await authClient.signUp.email({
@@ -55,6 +84,11 @@ export function SignUp() {
                     <FcGoogle className="mr-2 h-5 w-5" />
                     Sign up with Google
                 </Button>
+
+                <Button variant="secondary" type="button" className="w-full font-medium" onClick={handleGuestLogin} disabled={loading}>
+                    Login as Guest
+                </Button>
+
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />

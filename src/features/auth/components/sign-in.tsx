@@ -8,11 +8,42 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "react-hot-toast"
 import Link from "next/link"
 import { FcGoogle } from "react-icons/fc"
+import { useRouter } from "next/navigation"
 
 export function SignIn() {
+    const router = useRouter()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
+
+    const handleGuestLogin = async () => {
+        setLoading(true)
+        const guestEmail = `guest_${Date.now()}_${Math.floor(Math.random() * 1000000)}@example.com`
+        const guestPassword = "GuestPassword123!"
+        const guestName = "Guest User"
+
+        try {
+            toast.loading("Setting up guest account...", { id: "guest-login" })
+            await authClient.signUp.email({
+                email: guestEmail,
+                password: guestPassword,
+                name: guestName,
+                callbackURL: "/dashboard",
+            }, {
+                onSuccess: () => {
+                    toast.success("Logged in as Guest!", { id: "guest-login" })
+                    router.push("/dashboard")
+                },
+                onError: (ctx) => {
+                    toast.error(ctx.error.message || "Failed to log in as guest", { id: "guest-login" })
+                    setLoading(false)
+                }
+            })
+        } catch (error: any) {
+            toast.error(error?.message || "Failed to log in as guest", { id: "guest-login" })
+            setLoading(false)
+        }
+    }
 
     const handleSignIn = async () => {
         setLoading(true)
@@ -49,6 +80,10 @@ export function SignIn() {
                 <Button variant="outline" type="button" className="w-full" onClick={handleGoogleSignIn}>
                     <FcGoogle className="mr-2 h-5 w-5" />
                     Sign in with Google
+                </Button>
+
+                <Button variant="secondary" type="button" className="w-full font-medium" onClick={handleGuestLogin} disabled={loading}>
+                    Login as Guest
                 </Button>
 
                 <div className="relative">

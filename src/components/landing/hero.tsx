@@ -6,9 +6,11 @@ import { cn } from "@/lib/utils";
 import { SiZapier, SiWebflow, SiSlack, SiHubspot, SiFiverr } from "react-icons/si";
 import { ArrowRight, Sun, Moon } from "lucide-react";
 import Link from 'next/link';
-import { useSession } from "@/lib/auth-client";
+import { useSession, authClient } from "@/lib/auth-client";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "@/features/theme/store/themeSlice";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 interface HeroProps {
     className?: string;
@@ -19,6 +21,37 @@ export const Hero = ({ className }: HeroProps) => {
     const { theme } = useSelector((state: any) => state.theme);
     const { data: session } = useSession();
     const [mounted, setMounted] = React.useState(false);
+    const router = useRouter();
+    const [loadingGuest, setLoadingGuest] = React.useState(false);
+
+    const handleGuestLogin = async () => {
+        setLoadingGuest(true);
+        const guestEmail = `guest_${Date.now()}_${Math.floor(Math.random() * 1000000)}@example.com`;
+        const guestPassword = "GuestPassword123!";
+        const guestName = "Guest User";
+
+        try {
+            toast.loading("Setting up guest account...", { id: "guest-login" });
+            await authClient.signUp.email({
+                email: guestEmail,
+                password: guestPassword,
+                name: guestName,
+                callbackURL: "/dashboard",
+            }, {
+                onSuccess: () => {
+                    toast.success("Logged in as Guest!", { id: "guest-login" });
+                    router.push("/dashboard");
+                },
+                onError: (ctx) => {
+                    toast.error(ctx.error.message || "Failed to log in as guest", { id: "guest-login" });
+                    setLoadingGuest(false);
+                }
+            });
+        } catch (error: any) {
+            toast.error(error?.message || "Failed to log in as guest", { id: "guest-login" });
+            setLoadingGuest(false);
+        }
+    };
 
     React.useEffect(() => {
         setMounted(true);
@@ -66,16 +99,18 @@ export const Hero = ({ className }: HeroProps) => {
                         {!session ? (
                             <>
                                 <Link
-                                    href="/sign-in"
+                                    href="/sign-up"
                                     className="hidden md:block hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                                 >
-                                    Log in
+                                    Sign up
                                 </Link>
-                                <Link href="/sign-up">
-                                    <button className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white px-4 py-2 text-xs md:text-sm md:px-5 md:py-2 rounded-full transition-colors">
-                                        Get started
-                                    </button>
-                                </Link>
+                                <button
+                                    onClick={handleGuestLogin}
+                                    disabled={loadingGuest}
+                                    className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white px-4 py-2 text-xs md:text-sm md:px-5 md:py-2 rounded-full transition-colors disabled:opacity-50"
+                                >
+                                    {loadingGuest ? "Logging in..." : "Login as guest"}
+                                </button>
                             </>
                         ) : (
                             <Link href="/dashboard">
@@ -126,13 +161,23 @@ export const Hero = ({ className }: HeroProps) => {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 mb-16 md:mb-24 w-full sm:w-auto px-4 sm:px-0">
-                        <Link href={session ? "/dashboard" : "/sign-up"} className="w-full sm:w-auto">
+                        {!session ? (
                             <button
-                                className="w-full sm:w-auto flex items-center justify-center gap-3 bg-zinc-900 dark:bg-white text-white dark:text-black py-3 px-6 md:py-2 md:px-6 rounded-full font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95"
+                                onClick={handleGuestLogin}
+                                disabled={loadingGuest}
+                                className="w-full sm:w-auto flex items-center justify-center gap-3 bg-zinc-900 dark:bg-white text-white dark:text-black py-3 px-6 md:py-2 md:px-6 rounded-full font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
                             >
-                                Get Started
+                                {loadingGuest ? "Logging in..." : "Login as guest"}
                             </button>
-                        </Link>
+                        ) : (
+                            <Link href="/dashboard" className="w-full sm:w-auto">
+                                <button
+                                    className="w-full sm:w-auto flex items-center justify-center gap-3 bg-zinc-900 dark:bg-white text-white dark:text-black py-3 px-6 md:py-2 md:px-6 rounded-full font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95"
+                                >
+                                    Dashboard
+                                </button>
+                            </Link>
+                        )}
                         <button className="flex items-center gap-2 text-zinc-900 dark:text-white font-medium hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors group">
                             Learn more{" "}
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

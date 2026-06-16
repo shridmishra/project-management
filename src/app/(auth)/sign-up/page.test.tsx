@@ -74,4 +74,24 @@ describe('SignUp Page', () => {
             })
         })
     })
+
+    it('handles guest login', async () => {
+        const mockSignUpEmail = authClient.signUp.email as jest.Mock
+        mockSignUpEmail.mockResolvedValue({ data: {} })
+
+        render(<SignUpPage />)
+
+        const guestBtn = screen.getByRole('button', { name: /login as guest/i })
+        expect(guestBtn).toBeInTheDocument()
+        fireEvent.click(guestBtn)
+
+        await waitFor(() => {
+            expect(mockSignUpEmail).toHaveBeenCalledWith({
+                email: expect.stringMatching(/^guest_\d+_\d+@example.com$/),
+                password: 'GuestPassword123!',
+                name: 'Guest User',
+                callbackURL: '/dashboard',
+            }, expect.any(Object))
+        })
+    })
 })
